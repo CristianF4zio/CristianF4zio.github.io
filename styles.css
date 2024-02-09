@@ -1,0 +1,124 @@
+body {
+    font-family: 'Press Start 2P', cursive;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #330033;
+    color: #ffffff;
+}
+
+.screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(45, 15, 53, 0.8);
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    z-index: 1;
+}
+
+#start-screen {
+    animation: fadeIn 1s ease-in-out;
+}
+
+#game-screen {
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+h1 {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+label {
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="number"],
+button {
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #800080;
+    color: #ffffff;
+}
+
+button {
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #ff0066;
+}
+
+#game-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bingo-board {
+    display: flex;
+    flex-wrap: nowrap; /* Modificado para que los cartones no se ajusten automáticamente */
+    justify-content: space-around; /* Modificado para que los cartones se distribuyan horizontalmente */
+}
+
+.bingo-card {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    background-color: #2a115c;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    flex: 0 0 auto; /* Ajuste para que los cartones no crezcan */
+}
+
+.bingo-card h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.bingo-card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bingo-card td {
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #2a115c;
+    border-radius: 10px;
+    background-color: #673AB7;
+    color: #ffffff;
+}
+
+#fireworks-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none;
+
+}
