@@ -5,8 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo de la Abuela</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-image: url('ruta/a/tu/imagen-de-fondo.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* Ocultar el contenedor de las partículas en dispositivos móviles */
+        @media screen and (max-width: 768px) {
+            #particles-js {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Contenedor para los efectos de fuegos artificiales -->
+    <div id="particles-js"></div>
+
     <div id="start-screen" class="screen">
         <h1>Bingo de la Abuela</h1>
         <form id="setup-form" onsubmit="startGame(); return false;">
