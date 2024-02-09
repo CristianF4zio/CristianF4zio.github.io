@@ -24,7 +24,7 @@
 
     <div id="start-screen" class="screen">
         <h1>Bingo de la Abuela</h1>
-        <form id="setup-form">
+        <form id="setup-form" onsubmit="startGame(); return false;">
             <label for="player1">Jugador 1</label>
             <input type="text" id="player1" required><br>
             <label for="player2">Jugador 2</label>
@@ -33,10 +33,22 @@
             <input type="text" id="player3" required><br>
             <label for="player4">Jugador 4</label>
             <input type="text" id="player4" required><br>
+            <p></p>
             <label for="card-size">Tamaño del cartón</label>
             <input type="number" id="card-size" min="3" max="5" required><br>
+            <p></p>
             <button type="submit">Iniciar juego</button>
         </form>
+        <!-- Tabla de victorias -->
+        <div id="victories-table">
+            <h2>Tabla de Victorias</h2>
+            <table id="victories-table-content">
+                <tr>
+                    <th>Jugador</th>
+                    <th>Victorias acumuladas</th>
+                </tr>
+            </table>
+        </div>
     </div>
     
     <div id="game-screen" class="screen" style="display: none;">
@@ -59,6 +71,11 @@
 
     <script src="script.js"></script>
     <script>
+        function startGame() {
+            document.getElementById("start-screen").style.display = "none";
+            document.getElementById("game-screen").style.display = "block";
+        }
+        
         // Configuración de particles.js para efectos de fuegos artificiales
         particlesJS("particles-js", {
             "particles": {

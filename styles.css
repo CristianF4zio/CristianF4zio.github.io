@@ -121,3 +121,27 @@ button:hover {
 .hidden {
     display: none;
 }
+
+#victories-table {
+    margin-top: 50px;
+    color: white;
+}
+
+#victories-table-content {
+    width: 50%;
+    margin: auto;
+    border-collapse: collapse;
+}
+
+#victories-table-content th, #victories-table-content td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+#victories-table-content th {
+    background-color: #800080;
+}
+
+#victories-table-content tr:nth-child(even) {
+    background-color: #2a115c;
+}
