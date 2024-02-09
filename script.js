@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const setupForm = document.getElementById("setup-form");
     const gameScreen = document.getElementById("game-screen");
+    const bingoContainer = document.getElementById("bingo-container");
     const bingoBoard = document.getElementById("bingo-board");
     const turnCounterElement = document.getElementById("turn-counter");
     const calledNumbersElement = document.getElementById("called-numbers");
@@ -69,21 +70,24 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function initializeGame() {
-        // Mostrar todos los cartones de los jugadores
-        displayAllPlayerCards();
-        // Actualizar el contador de turnos
-        updateTurnCounter();
-        // Agregar evento al botón para sacar un número
-        callNumberBtn.addEventListener("click", callNumber);
-    }
+        // Mostrar el primer cartón de bingo al iniciar el juego
+        displayPlayerCard(players[0]);
 
-    function displayAllPlayerCards() {
-        for (let player in bingoCards) {
-            displayPlayerCard(player);
-        }
+        // Inicializar el botón de llamada de número
+        callNumberBtn.addEventListener("click", callNumber);
+
+        // Inicializar botones de navegación
+        const prevButton = document.getElementById("prev-button");
+        const nextButton = document.getElementById("next-button");
+
+        prevButton.addEventListener("click", showPrevCard);
+        nextButton.addEventListener("click", showNextCard);
     }
 
     function displayPlayerCard(player) {
+        // Limpiar el contenedor de los cartones de bingo
+        bingoBoard.innerHTML = "";
+
         const playerCard = bingoCards[player];
         const cardContainer = document.createElement("div");
         cardContainer.classList.add(player, "bingo-card"); // Añadir clase para identificar el jugador
@@ -114,9 +118,32 @@ document.addEventListener("DOMContentLoaded", function() {
         bingoBoard.appendChild(cardContainer);
     }
 
-    function updateTurnCounter() {
-        turnCounter++; // Incrementamos el contador de turnos
-        turnCounterElement.textContent = `Turno: ${turnCounter}`;
+    function showPrevCard() {
+        // Obtener el índice del jugador actual
+        const currentIndex = players.indexOf(currentPlayer);
+    
+        // Calcular el índice del jugador anterior
+        const prevIndex = (currentIndex - 1 + players.length) % players.length;
+    
+        // Mostrar el cartón del jugador anterior
+        displayPlayerCard(players[prevIndex]);
+    
+        // Actualizar el jugador actual
+        currentPlayer = players[prevIndex];
+    }
+
+    function showNextCard() {
+        // Obtener el índice del jugador actual
+        const currentIndex = players.indexOf(currentPlayer);
+    
+        // Calcular el índice del próximo jugador
+        const nextIndex = (currentIndex + 1) % players.length;
+    
+        // Mostrar el cartón del próximo jugador
+        displayPlayerCard(players[nextIndex]);
+    
+        // Actualizar el jugador actual
+        currentPlayer = players[nextIndex];
     }
 
     function callNumber() {
@@ -143,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (currentPlayerCard[i][j] === number) {
                         currentPlayerCard[i][j] = "X"; // Marcar el número como llamado
                         // Actualizar el cartón del jugador en la interfaz
-                        updatePlayerCard(player, playerCardContainer);
+                        displayPlayerCard(player);
                     }
                 }
             }
@@ -154,14 +181,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Pasar al siguiente turno
         nextTurn();
-    }
-
-    function updatePlayerCard(player, cardContainer) {
-        // Limpiar el contenedor del cartón del jugador
-        cardContainer.innerHTML = "";
-
-        // Mostrar el cartón actualizado del jugador
-        displayPlayerCard(player);
     }
 
     function checkWinConditions() {
@@ -199,12 +218,10 @@ document.addEventListener("DOMContentLoaded", function() {
             location.reload();
         }, 3000); // Reiniciar después de 3 segundos
     }
-    
-    
 
-    function updateLocalStorage(player) {
-        const victories = localStorage.getItem(`${player}-victories`) || 0;
-        localStorage.setItem(`${player}-victories`, parseInt(victories) + 1);
+    function updateTurnCounter() {
+        turnCounter++; // Incrementamos el contador de turnos
+        turnCounterElement.textContent = `Turno: ${turnCounter}`;
     }
 
     function nextTurn() {
@@ -232,5 +249,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Restablecer los cartones de bingo
         bingoCards = {};
+    }
+
+    // Función para mostrar efectos de fuegos artificiales
+    function fireworks() {
+        // Implementar efectos de fuegos artificiales aquí
+        console.log("¡Fuegos artificiales!");
     }
 });
