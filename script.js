@@ -239,24 +239,34 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
                 showMessage(`${player} tiene un puntaje de ${score}`);
             }
         });
-
+    
         if (!winner && turnCounter == 25) {
             declareDraw();
         }
     }
-
+    
+    
     function declareWinner(player) {
         fireworks();
         gameEnded = true;
         winner = player; // Establecer el ganador
         updateVictories(player);
         updateVictoriesTable();
+        showTotalScores(); // Mostrar puntaje total de cada jugador
         showMessage(`¡${player} ha ganado!`);
         setTimeout(() => {
             resetGame();
         }, 5000);
     }
+    
 
+    function showTotalScores() {
+        players.forEach(player => {
+            const score = calculateScore(player);
+            showMessage(`${player} tiene un puntaje total de ${score}`);
+        });
+    }
+    
     function declareDraw() {
         let noPoints = true;
         players.forEach(player => {
