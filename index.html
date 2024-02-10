@@ -23,6 +23,7 @@
     <div id="particles-js"></div>
 
     <div id="start-screen" class="screen">
+        <div id="menu-messages"></div>
         <h1>Bingo de la Abuela</h1>
         <form id="setup-form" onsubmit="startGame(); return false;">
             <label for="player1">Jugador 1</label>
@@ -67,6 +68,9 @@
         <div id="called-numbers">Números llamados:</div>
         <p></p>
         <button id="call-number-btn">Sacar número</button>
+
+        <!-- Botón para volver al menú principal -->
+        <button id="return-to-menu-btn">Terminar juego/Menú Principal</button>
     </div>
 
     <script src="script.js"></script>
@@ -75,7 +79,7 @@
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("game-screen").style.display = "block";
         }
-        
+
         // Configuración de particles.js para efectos de fuegos artificiales
         particlesJS("particles-js", {
             "particles": {

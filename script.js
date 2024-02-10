@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", function() {
+document.getElementById("return-to-menu-btn").addEventListener("click", resetGame);
+document.getElementById("return-to-menu-btn").addEventListener("click", function() {
+    resetGame(); 
+});
+
+
     let turnCounter = 0;
     let currentPlayer = "player1";
     let winner = null;
@@ -15,21 +21,21 @@ document.addEventListener("DOMContentLoaded", function() {
     const players = ["player1", "player2", "player3", "player4"];
     let bingoCards = {};
     const calledNumbers = new Set();
-    const markedNumbers = {}; // Objeto para almacenar los números marcados en cada cartón
+    let markedNumbers = {}; // Objeto para almacenar los números marcados en cada cartón
 
     setupForm.addEventListener("submit", function(event) {
         event.preventDefault();
 
         const playerNames = players.map(player => document.getElementById(player).value);
         if (new Set(playerNames).size !== players.length) {
-            alert("Los nombres de los jugadores no pueden ser iguales.");
+            showMessage("Los nombres de los jugadores no pueden ser iguales.");
             return;
         }
 
         const cardSize = parseInt(cardSizeInput.value);
 
         if (isNaN(cardSize) || cardSize < 3 || cardSize > 5) {
-            alert("El tamaño del cartón debe ser un número entre 3 y 5.");
+            showMessage("El tamaño del cartón debe ser un número entre 3 y 5.");
             return;
         }
 
@@ -76,7 +82,6 @@ document.addEventListener("DOMContentLoaded", function() {
     
         updateVictoriesTable();
     }
-    
 
     function displayPlayerCard(player) {
         bingoBoard.innerHTML = "";
@@ -123,29 +128,29 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function callNumber() {
+        if (turnCounter >= 25) {
+            resetGame();
+            document.getElementById("game-screen").style.display = "none";
+            document.getElementById("start-screen").style.display = "block";
+            return;
+        }
+
         let number;
         do {
             number = Math.floor(Math.random() * 50) + 1;
         } while (calledNumbers.has(number));
-    
+
         calledNumbers.add(number);
         calledNumber = number;
-    
+
         calledNumbersElement.textContent = `Números llamados: ${[...calledNumbers].join(", ")}`;
-    
+
         if (turnCounter < 25) {
             updateTurnCounter();
             markCalledNumberInAllCards();
             checkWinConditions();
-        } else if (turnCounter === 25) {
-            updateTurnCounter();
-            markCalledNumberInAllCards();
-            checkWinConditions();
-            resetGame(); // Llama a resetGame() cuando el turno llegue a 25
         }
     }
-    
-    
     
     function updateTurnCounter() {
         turnCounter++;
@@ -153,7 +158,6 @@ document.addEventListener("DOMContentLoaded", function() {
             turnCounterElement.textContent = `Turno: ${turnCounter}`;
         }
     }
-    
 
     function markCalledNumberInAllCards() {
         for (const player in bingoCards) {
@@ -178,6 +182,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    let scores = {}; // Objeto para mantener el registro de los puntajes de los jugadores
+
     function calculateScore(player) {
         const currentPlayerCard = bingoCards[player];
         let score = 0;
@@ -187,10 +193,10 @@ document.addEventListener("DOMContentLoaded", function() {
             let verticalLine = true;
 
             for (let j = 0; j < currentPlayerCard[i].length; j++) {
-                if (currentPlayerCard[i][j] !== "X") {
+                if (!markedNumbers[player].includes(currentPlayerCard[i][j])) {
                     horizontalLine = false;
                 }
-                if (currentPlayerCard[j][i] !== "X") {
+                if (!markedNumbers[player].includes(currentPlayerCard[j][i])) {
                     verticalLine = false;
                 }
             }
@@ -206,33 +212,31 @@ document.addEventListener("DOMContentLoaded", function() {
         let diagonal1 = true;
         let diagonal2 = true;
         for (let i = 0; i < currentPlayerCard.length; i++) {
-            if (currentPlayerCard[i][i] !== "X") {
+            if (!markedNumbers[player].includes(currentPlayerCard[i][i])) {
                 diagonal1 = false;
             }
-            if (currentPlayerCard[i][currentPlayerCard.length - 1 - i] !== "X") {
+            if (!markedNumbers[player].includes(currentPlayerCard[i][currentPlayerCard.length - 1 - i])) {
                 diagonal2 = false;
             }
         }
 
         if (diagonal1 || diagonal2) {
-            score += 3;
+            score += 1;
         }
 
-        if (currentPlayerCard.every(row => row.every(cell => cell === "X"))) {
-            score += 5;
-        }
+        scores[player] = score; // Actualizar el puntaje del jugador
 
         return score;
     }
 
     function checkWinConditions() {
         players.forEach(player => {
-            const currentPlayerCard = bingoCards[player];
-            if (currentPlayerCard.every(row => row.every(cell => cell === "X"))) {
+            const score = calculateScore(player);
+            if (score === 5) { // Si el jugador completa su cartón
                 declareWinner(player);
-            } else {
-                const score = calculateScore(player);
-                console.log(`${player} tiene un puntaje de ${score}`);
+            } else if (scores[player] !== score) { // Si el puntaje ha cambiado
+                scores[player] = score; // Actualizar el puntaje
+                showMessage(`${player} tiene un puntaje de ${score}`);
             }
         });
 
@@ -244,27 +248,49 @@ document.addEventListener("DOMContentLoaded", function() {
     function declareWinner(player) {
         fireworks();
         gameEnded = true;
+        winner = player; // Establecer el ganador
         updateVictories(player);
+        updateVictoriesTable();
+        showMessage(`¡${player} ha ganado!`);
         setTimeout(() => {
-            location.reload();
+            resetGame();
         }, 5000);
     }
 
     function declareDraw() {
+        let noPoints = true;
+        players.forEach(player => {
+            if (scores[player] > 0) {
+                noPoints = false;
+            }
+        });
+    
+        if (noPoints) {
+            showMessage("¡Es un empate!");
+        }
+    
         gameEnded = true;
+        updateVictoriesTable();
+        
         setTimeout(() => {
-            location.reload();
+            resetGame();
         }, 1500);
     }
+    
 
-    function updateTurnCounter() {
-        turnCounter++;
-        turnCounterElement.textContent = `Turno: ${turnCounter}`;
+    function showMessage(message) {
+        clearMessages(); // Limpiar mensajes anteriores
+        const messageContainer = document.createElement("div");
+        messageContainer.textContent = message;
+        messageContainer.classList.add("message");
+        document.getElementById("menu-messages").appendChild(messageContainer);
     }
-
-    function nextTurn() {
-        if (gameEnded) return;
-        updateTurnCounter();
+    
+    function clearMessages() {
+        const menuMessages = document.getElementById("menu-messages");
+        while (menuMessages.firstChild) {
+            menuMessages.removeChild(menuMessages.firstChild);
+        }
     }
 
     function resetGame() {
@@ -275,19 +301,27 @@ document.addEventListener("DOMContentLoaded", function() {
     
         bingoBoard.innerHTML = "";
         turnCounterElement.textContent = "Turno: 0";
+        calledNumbersElement.textContent = "Números llamados:"; // Limpiar los números llamados
     
+        setupForm.reset(); // Reiniciar el formulario
         setupForm.style.display = "block"; // Mostrar el formulario de inicio
         gameScreen.style.display = "none";  // Ocultar la pantalla de juego
     
         bingoCards = {};
         markedNumbers = {}; // Restablecer la lista de números marcados
     
-        // Esperar 1.7 segundos antes de recargar la página
+        // Mostrar el mensaje de "Otra partida? coloquen sus nombres!" solo si no está presente
+        if (!document.getElementById("restart-message")) {
+            showMessage("Otra partida? Coloquen sus nombres!");
+        }
+    
         setTimeout(() => {
-            location.reload();
-        }, 1700);
+            document.getElementById("start-screen").style.display = "block";
+            document.getElementById("game-screen").style.display = "none";
+        }, 0); // Esperar 0 milisegundos para cambiar la visualización inmediatamente
     }
-
+    
+    
     function fireworks() {
         console.log("¡Fuegos artificiales!");
     }
@@ -318,5 +352,4 @@ document.addEventListener("DOMContentLoaded", function() {
             tableContent.appendChild(row);
         }
     }
-
 });
