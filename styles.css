@@ -159,3 +159,31 @@ button:hover {
         width: 100%; /* Ajusta el ancho de la tabla al 100% del contenedor para pantallas aún más pequeñas */
     }
 }
+
+/* Estilos para la tabla de victorias */
+#victories-table {
+    margin-top: 20px;
+}
+
+#victories-table h2 {
+    text-align: center;
+}
+
+#victories-table-content {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #9c27b0; /* Color de fondo morado claro */
+}
+
+#victories-table-content th, #victories-table-content td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center; /* Centrar horizontalmente el texto */
+    vertical-align: middle; /* Centrar verticalmente el contenido */
+    color: white; /* Color de texto blanco */
+}
+
+#victories-table-content th {
+    background-color: #800080; /* Color de fondo morado más oscuro para encabezados */
+}
+

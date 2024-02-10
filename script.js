@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const players = ["player1", "player2", "player3", "player4"];
     let bingoCards = {};
     const calledNumbers = new Set();
+    const markedNumbers = {}; // Objeto para almacenar los números marcados en cada cartón
 
     setupForm.addEventListener("submit", function(event) {
         event.preventDefault();
@@ -36,14 +37,12 @@ document.addEventListener("DOMContentLoaded", function() {
             players.forEach((player, index) => {
                 bingoCards[player] = generateBingoCard(cardSize);
                 bingoCards[player].playerName = playerNames[index];
+                markedNumbers[player] = []; // Inicializar la lista de números marcados para cada jugador
             });
         }
 
         setupForm.style.display = "none";
         gameScreen.style.display = "block";
-
-        // Mostrar tabla de victorias al iniciar el juego
-        updateVictoriesTable();
 
         initializeGame();
     });
@@ -65,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function initializeGame() {
-        displayPlayerCard(players[0]);
+        displayPlayerCard(currentPlayer);
     
         callNumberBtn.addEventListener("click", callNumber);
     
@@ -75,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function() {
         prevButton.addEventListener("click", showPrevCard);
         nextButton.addEventListener("click", showNextCard);
     
-        // Llamar a la función para actualizar la tabla de victorias al iniciar el juego
         updateVictoriesTable();
     }
     
@@ -97,8 +95,9 @@ document.addEventListener("DOMContentLoaded", function() {
             for (let j = 0; j < playerCard[i].length; j++) {
                 const cell = document.createElement("td");
                 cell.textContent = playerCard[i][j];
-                if (playerCard[i][j] === "X") {
-                    cell.style.backgroundColor = "#00ff00";
+                // Comprobar si el número está marcado y aplicar un estilo
+                if (markedNumbers[player].includes(playerCard[i][j])) {
+                    cell.style.backgroundColor = "#34495e"; // Color azul oscuro
                 }
                 row.appendChild(cell);
             }
@@ -110,46 +109,73 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function showPrevCard() {
-        const currentIndex = players.indexOf(currentPlayer);
-        const prevIndex = (currentIndex - 1 + players.length) % players.length;
-        displayPlayerCard(players[prevIndex]);
-        currentPlayer = players[prevIndex];
+        let currentIndex = players.indexOf(currentPlayer);
+        currentIndex = (currentIndex - 1 + players.length) % players.length;
+        currentPlayer = players[currentIndex];
+        displayPlayerCard(currentPlayer);
     }
 
     function showNextCard() {
-        const currentIndex = players.indexOf(currentPlayer);
-        const nextIndex = (currentIndex + 1) % players.length;
-        displayPlayerCard(players[nextIndex]);
-        currentPlayer = players[nextIndex];
+        let currentIndex = players.indexOf(currentPlayer);
+        currentIndex = (currentIndex + 1) % players.length;
+        currentPlayer = players[currentIndex];
+        displayPlayerCard(currentPlayer);
     }
 
     function callNumber() {
-        if (gameEnded) return;
-
         let number;
         do {
             number = Math.floor(Math.random() * 50) + 1;
         } while (calledNumbers.has(number));
-
+    
         calledNumbers.add(number);
-
+        calledNumber = number;
+    
         calledNumbersElement.textContent = `Números llamados: ${[...calledNumbers].join(", ")}`;
+    
+        if (turnCounter < 25) {
+            updateTurnCounter();
+            markCalledNumberInAllCards();
+            checkWinConditions();
+        } else if (turnCounter === 25) {
+            updateTurnCounter();
+            markCalledNumberInAllCards();
+            checkWinConditions();
+            resetGame(); // Llama a resetGame() cuando el turno llegue a 25
+        }
+    }
+    
+    
+    
+    function updateTurnCounter() {
+        turnCounter++;
+        if (turnCounter <= 25) {
+            turnCounterElement.textContent = `Turno: ${turnCounter}`;
+        }
+    }
+    
 
-        players.forEach(player => {
-            const currentPlayerCard = bingoCards[player];
-            const playerCardContainer = bingoBoard.querySelector(`.${player}.bingo-card`);
-            for (let i = 0; i < currentPlayerCard.length; i++) {
-                for (let j = 0; j < currentPlayerCard[i].length; j++) {
-                    if (currentPlayerCard[i][j] === number) {
-                        currentPlayerCard[i][j] = "X";
-                        displayPlayerCard(player);
-                    }
+    function markCalledNumberInAllCards() {
+        for (const player in bingoCards) {
+            if (bingoCards.hasOwnProperty(player)) {
+                markCalledNumberInCard(player);
+            }
+        }
+    }
+
+    function markCalledNumberInCard(player) {
+        const currentPlayerCard = bingoCards[player];
+        // Almacenar el número marcado en la lista correspondiente al jugador
+        markedNumbers[player].push(calledNumber);
+        const playerCardContainer = bingoBoard.querySelector(`.${player}.bingo-card`);
+        for (let i = 0; i < currentPlayerCard.length; i++) {
+            for (let j = 0; j < currentPlayerCard[i].length; j++) {
+                if (currentPlayerCard[i][j] === calledNumber) {
+                    const cell = playerCardContainer.querySelector(`table tr:nth-child(${i + 1}) td:nth-child(${j + 1})`);
+                    cell.style.backgroundColor = "#34495e"; // Color azul oscuro
                 }
             }
-        });
-
-        checkWinConditions();
-        nextTurn();
+        }
     }
 
     function calculateScore(player) {
@@ -210,7 +236,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
 
-        if (!winner && turnCounter >= 25) {
+        if (!winner && turnCounter == 25) {
             declareDraw();
         }
     }
@@ -218,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function declareWinner(player) {
         fireworks();
         gameEnded = true;
-        updateVictories(player); // Actualizar la tabla de victorias al declarar un ganador
+        updateVictories(player);
         setTimeout(() => {
             location.reload();
         }, 5000);
@@ -246,36 +272,38 @@ document.addEventListener("DOMContentLoaded", function() {
         gameEnded = false;
         winner = null;
         calledNumbers.clear();
-
+    
         bingoBoard.innerHTML = "";
         turnCounterElement.textContent = "Turno: 0";
-
-        setupForm.style.display = "block";
-        gameScreen.style.display = "none";
-
+    
+        setupForm.style.display = "block"; // Mostrar el formulario de inicio
+        gameScreen.style.display = "none";  // Ocultar la pantalla de juego
+    
         bingoCards = {};
+        markedNumbers = {}; // Restablecer la lista de números marcados
+    
+        // Esperar 1.7 segundos antes de recargar la página
+        setTimeout(() => {
+            location.reload();
+        }, 1700);
     }
 
     function fireworks() {
         console.log("¡Fuegos artificiales!");
     }
 
-    // Función para actualizar la tabla de victorias con los datos almacenados en localStorage
     function updateVictories(player) {
         let victoriesData = JSON.parse(localStorage.getItem("victories")) || {};
         victoriesData[player] = (victoriesData[player] || 0) + 1;
         localStorage.setItem("victories", JSON.stringify(victoriesData));
     }
 
-    // Función para mostrar la tabla de victorias al iniciar el juego
     function updateVictoriesTable() {
         const victoriesData = JSON.parse(localStorage.getItem("victories")) || {};
         const tableContent = document.getElementById("victories-table-content");
 
-        // Limpiar contenido anterior de la tabla
         tableContent.innerHTML = "";
 
-        // Iterar sobre los datos de victorias y agregar filas a la tabla
         for (const player in victoriesData) {
             const row = document.createElement("tr");
             const playerNameCell = document.createElement("td");
