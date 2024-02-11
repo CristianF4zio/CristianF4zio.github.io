@@ -151,29 +151,42 @@ function startGame() {
     }
 
     function callNumber() {
+        if (gameEnded) {
+            return; // Si el juego ya terminó, salir de la función
+        }
+    
         if (turnCounter >= 25) {
             resetGame();
             document.getElementById("game-screen").style.display = "none";
             document.getElementById("start-screen").style.display = "block";
             return;
         }
-
+    
         let number;
         do {
             number = Math.floor(Math.random() * 50) + 1;
         } while (calledNumbers.has(number));
-
+    
         calledNumbers.add(number);
         calledNumber = number;
-
+    
         calledNumbersElement.textContent = `Números llamados: ${[...calledNumbers].join(", ")}`;
-
-        if (turnCounter < 25) {
-            updateTurnCounter();
-            markCalledNumberInAllCards();
-            checkWinConditions();
+    
+        updateTurnCounter();
+        markCalledNumberInAllCards();
+        checkWinConditions(); // Verificar condiciones de victoria después de marcar el número
+    
+        if (gameEnded) {
+            return; // Si el juego ya terminó, salir de la función
+        }
+    
+        if (turnCounter >= 25) {
+            resetGame();
+            document.getElementById("game-screen").style.display = "none";
+            document.getElementById("start-screen").style.display = "block";
         }
     }
+    
 
     function updateTurnCounter() {
         turnCounter++;
@@ -200,10 +213,13 @@ function startGame() {
                 if (currentPlayerCard[i][j] === calledNumber) {
                     const cell = playerCardContainer.querySelector(`table tr:nth-child(${i + 1}) td:nth-child(${j + 1})`);
                     cell.style.backgroundColor = "#34495e"; // Color azul oscuro
+                    // Verificar si se ha conseguido una nueva línea o cartón lleno
+                    checkWinConditions();
                 }
             }
         }
     }
+    
 
     function checkWinConditions() {
         players.forEach(player => {
@@ -358,6 +374,37 @@ function startGame() {
             document.getElementById("start-screen").style.display = "block";
             document.getElementById("game-screen").style.display = "none";
         }, 0); // Esperar 0 milisegundos para cambiar la visualización inmediatamente
+            showScores();
+    }
+
+    
+    function showScores() {
+        const scoresContainer = document.getElementById("scores-container");
+        scoresContainer.innerHTML = ""; // Limpiar el contenido anterior
+    
+        players.forEach(player => {
+            const playerScore = calculateTotalScore(player);
+            const victories = getVictories(player);
+            
+            const playerScoreElement = document.createElement("div");
+            playerScoreElement.textContent = `${bingoCards[player].playerName}: Puntos totales - ${playerScore}, Victorias acumuladas - ${victories}`;
+            scoresContainer.appendChild(playerScoreElement);
+        });
+    }
+    
+    function calculateTotalScore(player) {
+        let totalScore = 0;
+        const currentPlayerCard = bingoCards[player];
+    
+        // Sumar los puntos de cada jugador
+        totalScore += calculateScore(player);
+    
+        return totalScore;
+    }
+    
+    function getVictories(player) {
+        const victoriesData = JSON.parse(localStorage.getItem("victories")) || {};
+        return victoriesData[player] || 0;
     }
     
 
