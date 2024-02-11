@@ -36,19 +36,20 @@
             <input type="text" id="player4" required><br>
             <label for="card-size">Tamaño del cartón</label>
             <input type="number" id="card-size" min="3" max="5" required><br>
-            <p></p>
-            <button type="submit">Iniciar juego</button>
+            <p id="puntos"></p> <!-- Nuevo elemento para mostrar los puntos -->
+            <button type="submit">Iniciar juego</button> 
         </form>
         <!-- Tabla de victorias -->
-        <div id="victories-table">
-            <h2>Tabla de Victorias</h2>
-            <table id="victories-table-content">
-                <tr>
-                    <th>Jugador</th>
-                    <th>Victorias acumuladas</th>
-                </tr>
-            </table>
-        </div>
+        <!-- Tabla de victorias -->
+<div id="victories-table">
+    <h2>Tabla de Victorias</h2>
+    <table id="victories-table-content">
+        <tr>
+            <th>Jugador</th>
+            <th>Victorias acumuladas</th>
+        </tr>
+    </table>
+</div>
     </div>
     
     <div id="game-screen" class="screen" style="display: none;">
@@ -75,12 +76,48 @@
 
     <script src="script.js"></script>
     <script>
+        // Variables globales para el seguimiento de los puntos
+        let puntosJugador1 = 0;
+        let puntosJugador2 = 0;
+        let puntosJugador3 = 0;
+        let puntosJugador4 = 0;
+
+        // Función para iniciar el juego
         function startGame() {
+            // Ocultar pantalla de inicio y mostrar pantalla del juego
             document.getElementById("start-screen").style.display = "none";
             document.getElementById("game-screen").style.display = "block";
+
+            // Mostrar los puntos iniciales
+            mostrarPuntos();
         }
 
-        // Configuración de particles.js para efectos de fuegos artificiales
+        // Función para mostrar los puntos en la pantalla del juego
+        function mostrarPuntos() {
+            // Obtener el tamaño del cartón ingresado por el usuario
+            const cardSize = parseInt(document.getElementById("card-size").value);
+
+            // Calcular los puntos máximos posibles según el tamaño del cartón
+            const puntosMaximos = calcularPuntosMaximos(cardSize);
+
+            // Actualizar el elemento de puntos para cada jugador
+            document.getElementById("puntos").innerHTML = `
+                <strong>Puntos:</strong><br>
+                Jugador 1: ${puntosJugador1}<br>
+                Jugador 2: ${puntosJugador2}<br>
+                Jugador 3: ${puntosJugador3}<br>
+                Jugador 4: ${puntosJugador4} 
+            `;
+        }
+
+        // Función para calcular los puntos máximos posibles según el tamaño del cartón
+        function calcularPuntosMaximos(cardSize) {
+            return cardSize === 3 ? 13 : cardSize === 4 ? 17 : 25;
+        }
+    </script>
+
+    <!-- Configuración de particles.js para efectos de fuegos artificiales -->
+    <script>
         particlesJS("particles-js", {
             "particles": {
                 "number": {

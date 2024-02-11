@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", function() {
-document.getElementById("return-to-menu-btn").addEventListener("click", resetGame);
-document.getElementById("return-to-menu-btn").addEventListener("click", function() {
-    resetGame(); 
-});
-
+    document.getElementById("return-to-menu-btn").addEventListener("click", resetGame);
+    document.getElementById("return-to-menu-btn").addEventListener("click", function() {
+        resetGame(); 
+        
+    });
 
     let turnCounter = 0;
     let currentPlayer = "player1";
@@ -69,17 +69,40 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
         return card;
     }
 
+    // Función para reiniciar los puntos de cada jugador
+    function resetPoints() {
+        puntosJugador1 = 0;
+        puntosJugador2 = 0;
+        puntosJugador3 = 0;
+        puntosJugador4 = 0;
+    }
+
+    // Función para iniciar el juego
+    // Función para iniciar el juego
+function startGame() {
+    // Reiniciar los puntos al inicio de cada juego
+    resetScore();
+    
+    // Ocultar pantalla de inicio y mostrar pantalla del juego
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("game-screen").style.display = "block";
+
+    // Mostrar los puntos iniciales
+    mostrarPuntos();
+}
+
+
     function initializeGame() {
         displayPlayerCard(currentPlayer);
-    
+
         callNumberBtn.addEventListener("click", callNumber);
-    
+
         const prevButton = document.getElementById("prev-button");
         const nextButton = document.getElementById("next-button");
-    
+
         prevButton.addEventListener("click", showPrevCard);
         nextButton.addEventListener("click", showNextCard);
-    
+
         updateVictoriesTable();
     }
 
@@ -89,7 +112,7 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
         const playerCard = bingoCards[player];
         const cardContainer = document.createElement("div");
         cardContainer.classList.add(player, "bingo-card");
-        
+
         const cardTitle = document.createElement("h2");
         cardTitle.textContent = `${playerCard.playerName}'s Bingo Card`;
         cardContainer.appendChild(cardTitle);
@@ -151,7 +174,7 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
             checkWinConditions();
         }
     }
-    
+
     function updateTurnCounter() {
         turnCounter++;
         if (turnCounter <= 25) {
@@ -182,33 +205,65 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
         }
     }
 
-    let scores = {}; // Objeto para mantener el registro de los puntajes de los jugadores
-
-    function calculateScore(player) {
-        const currentPlayerCard = bingoCards[player];
-        let score = 0;
-
-        for (let i = 0; i < currentPlayerCard.length; i++) {
-            let horizontalLine = true;
-            let verticalLine = true;
-
-            for (let j = 0; j < currentPlayerCard[i].length; j++) {
-                if (!markedNumbers[player].includes(currentPlayerCard[i][j])) {
-                    horizontalLine = false;
-                }
-                if (!markedNumbers[player].includes(currentPlayerCard[j][i])) {
-                    verticalLine = false;
+    function checkWinConditions() {
+        players.forEach(player => {
+            const score = calculateScore(player);
+            if (score > 0) { // Si el jugador ha ganado algún punto
+                if (score === 5) {
+                    showMessage(`${bingoCards[player].playerName} ha completado un cartón lleno!`);
+                    setTimeout(() => {
+                        resetGame();
+                    }, 1500);
+                } else {
+                    showMessage(`${bingoCards[player].playerName} ha ganado ${score} puntos`);
+                    // Sumar los puntos al jugador correspondiente
+                    if (player === "player1") {
+                        puntosJugador1 += score;
+                    } else if (player === "player2") {
+                        puntosJugador2 += score;
+                    } else if (player === "player3") {
+                        puntosJugador3 += score;
+                    } else if (player === "player4") {
+                        puntosJugador4 += score;
+                    }
+                    // Actualizar la visualización de los puntos en la pantalla del juego
+                    mostrarPuntos();
                 }
             }
-
-            if (horizontalLine) {
+        });
+    
+        if (!winner && turnCounter == 25) {
+            declareDraw();
+        }
+    }
+    
+    
+    function calculateScore(player) {
+        let score = 0;
+        const currentPlayerCard = bingoCards[player];
+    
+        // Verificar si hay una línea horizontal completa
+        for (let i = 0; i < currentPlayerCard.length; i++) {
+            if (currentPlayerCard[i].every(number => markedNumbers[player].includes(number))) {
                 score += 1;
+            }
+        }
+    
+        // Verificar si hay una línea vertical completa
+        for (let i = 0; i < currentPlayerCard.length; i++) {
+            let verticalLine = true;
+            for (let j = 0; j < currentPlayerCard.length; j++) {
+                if (!markedNumbers[player].includes(currentPlayerCard[j][i])) {
+                    verticalLine = false;
+                    break;
+                }
             }
             if (verticalLine) {
                 score += 1;
             }
         }
-
+    
+        // Verificar si hay una línea diagonal completa
         let diagonal1 = true;
         let diagonal2 = true;
         for (let i = 0; i < currentPlayerCard.length; i++) {
@@ -219,74 +274,39 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
                 diagonal2 = false;
             }
         }
-
+    
         if (diagonal1 || diagonal2) {
-            score += 1;
+            score += 3;
         }
-
-        scores[player] = score; // Actualizar el puntaje del jugador
-
+    
+        // Verificar si el cartón está lleno
+        if (currentPlayerCard.every(row => row.every(number => markedNumbers[player].includes(number)))) {
+            score += 5;
+        }
+    
         return score;
     }
-
-    function checkWinConditions() {
-        players.forEach(player => {
-            const score = calculateScore(player);
-            if (score === 5) { // Si el jugador completa su cartón
-                declareWinner(player);
-            } else if (scores[player] !== score) { // Si el puntaje ha cambiado
-                scores[player] = score; // Actualizar el puntaje
-                showMessage(`${player} tiene un puntaje de ${score}`);
-            }
-        });
-    
-        if (!winner && turnCounter == 25) {
-            declareDraw();
-        }
-    }
-    
-    
-    function declareWinner(player) {
-        fireworks();
-        gameEnded = true;
-        winner = player; // Establecer el ganador
-        updateVictories(player);
-        updateVictoriesTable();
-        showTotalScores(); // Mostrar puntaje total de cada jugador
-        showMessage(`¡${player} ha ganado!`);
-        setTimeout(() => {
-            resetGame();
-        }, 5000);
-    }
     
 
-    function showTotalScores() {
-        players.forEach(player => {
-            const score = calculateScore(player);
-            showMessage(`${player} tiene un puntaje total de ${score}`);
-        });
-    }
-    
     function declareDraw() {
         let noPoints = true;
         players.forEach(player => {
-            if (scores[player] > 0) {
+            if (calculateScore(player) > 0) {
                 noPoints = false;
             }
         });
-    
+
         if (noPoints) {
             showMessage("¡Es un empate!");
         }
-    
+
         gameEnded = true;
         updateVictoriesTable();
-        
+
         setTimeout(() => {
             resetGame();
         }, 1500);
     }
-    
 
     function showMessage(message) {
         clearMessages(); // Limpiar mensajes anteriores
@@ -294,8 +314,9 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
         messageContainer.textContent = message;
         messageContainer.classList.add("message");
         document.getElementById("menu-messages").appendChild(messageContainer);
+        
     }
-    
+
     function clearMessages() {
         const menuMessages = document.getElementById("menu-messages");
         while (menuMessages.firstChild) {
@@ -304,6 +325,8 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
     }
 
     function resetGame() {
+        document.getElementById("victories-table").style.display = "none";
+    
         turnCounter = 0;
         gameEnded = false;
         winner = null;
@@ -320,6 +343,12 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
         bingoCards = {};
         markedNumbers = {}; // Restablecer la lista de números marcados
     
+        // Reiniciar los puntos de los jugadores al reiniciar el juego
+        resetPoints();
+    
+        // Ocultar la tabla de puntajes al reiniciar el juego
+        document.getElementById("victories-table").style.display = "none";
+    
         // Mostrar el mensaje de "Otra partida? coloquen sus nombres!" solo si no está presente
         if (!document.getElementById("restart-message")) {
             showMessage("Otra partida? Coloquen sus nombres!");
@@ -331,10 +360,6 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
         }, 0); // Esperar 0 milisegundos para cambiar la visualización inmediatamente
     }
     
-    
-    function fireworks() {
-        console.log("¡Fuegos artificiales!");
-    }
 
     function updateVictories(player) {
         let victoriesData = JSON.parse(localStorage.getItem("victories")) || {};
@@ -342,24 +367,54 @@ document.getElementById("return-to-menu-btn").addEventListener("click", function
         localStorage.setItem("victories", JSON.stringify(victoriesData));
     }
 
+    document.addEventListener("DOMContentLoaded", function() {
+        // Llama a la función para actualizar la tabla de victorias cuando se carga la página
+        updateVictoriesTable();
+    });
+    
     function updateVictoriesTable() {
         const victoriesData = JSON.parse(localStorage.getItem("victories")) || {};
         const tableContent = document.getElementById("victories-table-content");
-
+    
         tableContent.innerHTML = "";
-
+    
         for (const player in victoriesData) {
             const row = document.createElement("tr");
             const playerNameCell = document.createElement("td");
             const victoriesCell = document.createElement("td");
-
+    
             playerNameCell.textContent = player;
             victoriesCell.textContent = victoriesData[player];
-
+    
             row.appendChild(playerNameCell);
             row.appendChild(victoriesCell);
-
+    
             tableContent.appendChild(row);
         }
     }
+    function resetScore() {
+        // Reinicia los puntos de cada jugador al valor inicial
+        puntosJugador1 = 0;
+        puntosJugador2 = 0;
+        puntosJugador3 = 0;
+        puntosJugador4 = 0;
+    
+        // Actualiza la visualización de los puntos en la pantalla del juego
+        mostrarPuntos();
+    }
+    // Función para iniciar el juego
+    function startGame() {
+        const playerNames = players.map(player => document.getElementById(player).value);
+        const uniqueNames = new Set(playerNames);
+        if (uniqueNames.size !== playerNames.length) {
+            showModal("Los nombres de los jugadores no pueden ser iguales.");
+            return;
+        }
+    
+        resetScore();
+        document.getElementById("start-screen").style.display = "none";
+        document.getElementById("game-screen").style.display = "block";
+        mostrarPuntos();
+    }
+    
 });
