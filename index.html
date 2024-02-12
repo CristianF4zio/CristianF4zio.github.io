@@ -37,24 +37,35 @@
             <label for="card-size">Tamaño del cartón</label>
             <input type="number" id="card-size" min="3" max="5" required><br>
             <p id="puntos"></p> <!-- Nuevo elemento para mostrar los puntos -->
+            <p></p>
             <button type="submit">Iniciar juego</button> 
         </form>
         <!-- Tabla de victorias -->
-        <!-- Tabla de victorias -->
-<div id="victories-table">
-    <h2>Tabla de Victorias</h2>
-    <table id="victories-table-content">
-        <tr>
-            <th>Jugador</th>
-            <th>Victorias acumuladas</th>
-        </tr>
-    </table>
-</div>
+        <!-- Modal para mostrar al ganador -->
+        <div id="winner-modal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="winner-message"></p>
+          </div>
+        </div>
 
+        <div id="victories-table">
+            <h2>Tabla de Victorias</h2>
+            <table id="victories-table-content">
+                <tr>
+                    <th>Jugador</th>
+                    <th>Victorias acumuladas</th>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Botón para ver las victorias -->
+        <p></p>
     </div>
     
     <div id="game-screen" class="screen" style="display: none;">
         <h1>A Jugar!</h1>
+        <div id="winner-message-container" class="winner-message" style="display: none;"></div>
         <div id="message-container"></div>
         <p></p>
         <div id="bingo-container">
@@ -69,10 +80,10 @@
         <div id="turn-counter">Turno: 0</div>
         <div id="called-numbers">Números llamados:</div>
         <p></p>
-        <button id="call-number-btn">Sacar número</button>
-
-        <!-- Botón para volver al menú principal -->
-        <button id="return-to-menu-btn">Terminar juego/Menú Principal</button>
+        <div id="button-container">
+            <button id="return-to-menu-btn">Terminar juego/menu principal</button>
+            <button id="call-number-btn">Sacar número</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
@@ -115,6 +126,12 @@
         function calcularPuntosMaximos(cardSize) {
             return cardSize === 3 ? 13 : cardSize === 4 ? 17 : 25;
         }
+
+        // Función para redirigir a la página de victorias
+        function showVictories() {
+            // Redirigir a la página de victorias
+            window.location.href = 'victories.html'; // Cambia 'victories.html' por la ruta de tu página de victorias
+        }
     </script>
 
     <!-- Configuración de particles.js para efectos de fuegos artificiales -->
@@ -148,7 +165,7 @@
                 },
                 "opacity": {
                     "value": 0.5,
-                    "random": false,
+                    "random": true,
                     "anim": {
                         "enable": false,
                         "speed": 1,
@@ -193,7 +210,7 @@
                 "events": {
                     "onhover": {
                         "enable": true,
-                        "mode": "grab"
+                        "mode": "repulse"
                     },
                     "onclick": {
                         "enable": true,
@@ -203,7 +220,7 @@
                 },
                 "modes": {
                     "grab": {
-                        "distance": 140,
+                        "distance": 400,
                         "line_linked": {
                             "opacity": 1
                         }
